@@ -3,7 +3,7 @@ var app = {
   regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/i,
   gameOver: false,
   init: function () {
-    console.log('init')
+    // console.log('init')
     app.getRandomPositions()
     app.drawBoard()
     // Event listeners
@@ -15,7 +15,9 @@ var app = {
 
   reset: function () {
     app.gameOver = false
-    app.errorMessages.remove()
+    if (app.errorMessages) {
+      app.errorMessages.remove()
+    }
     document.getElementById('userCode').value = ''
     app.init()
   },
@@ -28,8 +30,8 @@ var app = {
     app.y = app.yStart
     app.xFinish = Math.floor(Math.random() * 6) + 1
     app.yFinish = Math.floor(Math.random() * 4) + 1
-    console.log('Start : [' + app.xStart + ',' + app.yStart + ']')
-    console.log('Finish : [' + app.xFinish + ',' + app.yFinish + ']')
+    // console.log('Start : [' + app.xStart + ',' + app.yStart + ']')
+    // console.log('Finish : [' + app.xFinish + ',' + app.yFinish + ']')
     if (
       ((app.xStart >= app.xFinish - 1) && (app.xStart <= app.xFinish + 1)) &&
       ((app.yStart >= app.yFinish - 1) && (app.yStart <= app.yFinish + 1))
@@ -130,7 +132,7 @@ var app = {
     document.getElementById('board').innerHTML = ""
     let currentPosition = [app.x, app.y]
     let currentDirection = app.direction
-    console.log(currentPosition)
+    // console.log(currentPosition)
     for (let i = 1; i <= 4; i++) {
       // i correspond à app.y & j correspond à app.x
       let newRow = document.createElement('div')
@@ -175,13 +177,14 @@ var app = {
     // Appel, après 2sec, la méthode codeLineLoop() avec la variable et l'index de départ (0)
     window.setTimeout(function () {
       app.codeLineLoop(codeLines, 0)
+      // TODO timeout
     }, 2000)
   },
 
   codeLineLoop: function (codeLines, index) {
     // Getting currentLine
     let currentLine = codeLines[index]
-    console.log(currentLine)
+    // console.log(currentLine)
     // console.log(typeof currentLine)
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
@@ -195,7 +198,7 @@ var app = {
     if ((app.regCommand.exec(currentLine))) {
       let match = app.regCommand.exec(currentLine)
 
-      console.log('c\'est pas faux')
+      // console.log('c\'est pas faux')
       if (match[4]) {
         // console.log('ok - move forward')
         app.moveForward()
@@ -211,7 +214,7 @@ var app = {
         app.turnLeft()
         app.drawBoard()
       }
-      
+
 
     } else {
       // si on a tapé n'importe quoi
@@ -252,6 +255,7 @@ var app = {
         // Recall same method (=> make a loop)
         window.setTimeout(function () {
           app.codeLineLoop(codeLines, index)
+          // TODO timeout
         }, 1000)
       } else {
         // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
@@ -261,8 +265,9 @@ var app = {
       // si il n'y a pas de 'game over' et qu'on est arrivés en fin de code
       if (!app.gameOver) {
         window.setTimeout(function () {
-          // on vérifie si on a gagné 
+          // on vérifie si on a gagné
           app.checkSuccess()
+          // TODO timeout
         }, 1000)
       } else {
         // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
