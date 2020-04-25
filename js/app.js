@@ -1,21 +1,14 @@
 var app = {
   errorMessages: '',
-  // moves: ['move forward', 'turn right', 'turn left'],
   regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/,
   gameOver: false,
   init: function () {
     console.log('init')
-    // TODO
-    // app.moveForward()
-    // app.turnRight()
-    // app.moveForward()
-    // app.turnLeft()
-    // app.moveForward()
 
     app.getRandomPositions()
     app.drawBoard()
-    // Event listeners - TODO
-    document.addEventListener('keydown', app.handleKeys)
+    // Event listeners
+    // document.addEventListener('keydown', app.handleKeys)
     document.getElementById('launchScript').addEventListener('click', app.handleLaunchScriptButton)
 
   },
@@ -72,7 +65,6 @@ var app = {
       (app.x > 6) ||
       (app.y < 1) ||
       (app.y > 4)) {
-      // TODO bug fix = si on sort du cadre, app.codeLineLoop continue à boucler malgré le 'game over'
       alert('OUT OF BOUNDS ! - GAME OVER')
       app.gameOver = true
       document.getElementById('userCode').value = ''
@@ -167,17 +159,15 @@ var app = {
   },
 
   handleLaunchScriptButton: function () {
-    // TODO
     if (app.errorMessages) {
       app.errorMessages.remove()
     }
-    // TODO : get all lines as an array
     let codeLines = document.getElementById('userCode').value.split('\n')
     // console.log(codeLines)
-    // Appel, après 2sec, la méthode codeLineLoop() avec la variable et l'index de départ (0) 2000 au lieu de 100
+    // Appel, après 2sec, la méthode codeLineLoop() avec la variable et l'index de départ (0)
     window.setTimeout(function () {
       app.codeLineLoop(codeLines, 0)
-    }, 100)
+    }, 2000)
   },
 
   codeLineLoop: function (codeLines, index) {
@@ -188,16 +178,9 @@ var app = {
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
 
-    // if (app.moves.indexOf(currentLine) < 0) {
-    //   alert('Merci d\'entrer des fonctions valides parmi : "turn right", "turn left" et "move forward"')
-    //   return
-    // } else {
     // Function fonctionne, mais erreur en console si input vide ... sécurité ??? turnLeft / turnRight / moveForward
     // Function('"use strict";return (app.' + currentLine + '())')()
-    // console.log('c\'est pas faux')
 
-    //   app.drawBoard()
-    // }
     // Test de sécurité, à c/c dans l'input; si ça s'exécute, c'est pas bon !
     // window.location = 'http://www.google.com'
 
@@ -205,21 +188,18 @@ var app = {
       let match = app.regCommand.exec(currentLine)
 
       console.log('c\'est pas faux')
-      // if (currentLine == 'move forward') {
       if (match[4]) {
-        console.log('ok - move forward')
+        // console.log('ok - move forward')
         app.moveForward()
         app.drawBoard()
       }
-      // if (currentLine == 'turn right') {
       if (match[12]) {
-        console.log('ok - turn right')
+        // console.log('ok - turn right')
         app.turnRight()
         app.drawBoard()
       }
-      // if (currentLine == 'turn left') {
       if (match[8]) {
-        console.log('ok - turn left')
+        // console.log('ok - turn left')
         app.turnLeft()
         app.drawBoard()
       }
@@ -257,15 +237,14 @@ var app = {
     // Increment
     index++;
 
-
     // if still a line to interpret
     if (index < codeLines.length) {
       // si il n'y a pas de 'game over' on continue de vérifier et d'exécuter le code
       if (!app.gameOver) {
-        // Recall same method (=> make a loop) 1000 au lieu de 100
+        // Recall same method (=> make a loop)
         window.setTimeout(function () {
           app.codeLineLoop(codeLines, index)
-        }, 100)
+        }, 1000)
       } else {
         // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
         app.gameOver = false
@@ -276,7 +255,7 @@ var app = {
         window.setTimeout(function () {
           // on vérifie si on a gagné 
           app.checkSuccess()
-        }, 100)
+        }, 1000)
       } else {
         // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
         app.gameOver = false
