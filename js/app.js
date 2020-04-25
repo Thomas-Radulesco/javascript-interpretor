@@ -1,7 +1,7 @@
 var app = {
-
-  direction: 'right',
-  moves: ['moveForward', 'turnRight', 'turnLeft', ''],
+  errorMessages: '',
+  // moves: ['move forward', 'turn right', 'turn left'],
+  regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/,
   gameOver: false,
   init: function () {
     console.log('init')
@@ -11,6 +11,7 @@ var app = {
     // app.moveForward()
     // app.turnLeft()
     // app.moveForward()
+
     app.getRandomPositions()
     app.drawBoard()
     // Event listeners - TODO
@@ -163,13 +164,13 @@ var app = {
       }
       document.getElementById('board').appendChild(newRow)
     }
-
-
-
   },
 
   handleLaunchScriptButton: function () {
     // TODO
+    if (app.errorMessages) {
+      app.errorMessages.remove()
+    }
     // TODO : get all lines as an array
     let codeLines = document.getElementById('userCode').value.split('\n')
     // console.log(codeLines)
@@ -181,23 +182,78 @@ var app = {
 
   codeLineLoop: function (codeLines, index) {
     // Getting currentLine
-    var currentLine = codeLines[index]
+    let currentLine = codeLines[index]
     console.log(currentLine)
     // console.log(typeof currentLine)
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
 
-    if (app.moves.indexOf(currentLine) < 0) {
-      alert('Merci d\'entrer des fonctions valides parmi : moveForward, turnRight ou turnLeft')
-      return
-    } else {
-      // Function fonctionne, mais erreur en console si input vide ... sécurité ???
-      Function('"use strict";return (app.' + currentLine + '())')()
-      app.drawBoard()
-    }
+    // if (app.moves.indexOf(currentLine) < 0) {
+    //   alert('Merci d\'entrer des fonctions valides parmi : "turn right", "turn left" et "move forward"')
+    //   return
+    // } else {
+    // Function fonctionne, mais erreur en console si input vide ... sécurité ??? turnLeft / turnRight / moveForward
+    // Function('"use strict";return (app.' + currentLine + '())')()
+    // console.log('c\'est pas faux')
+
+    //   app.drawBoard()
+    // }
     // Test de sécurité, à c/c dans l'input; si ça s'exécute, c'est pas bon !
     // window.location = 'http://www.google.com'
 
+    if ((app.regCommand.exec(currentLine))) {
+      let match = app.regCommand.exec(currentLine)
+
+      console.log('c\'est pas faux')
+      // if (currentLine == 'move forward') {
+      if (match[4]) {
+        console.log('ok - move forward')
+        app.moveForward()
+        app.drawBoard()
+      }
+      // if (currentLine == 'turn right') {
+      if (match[12]) {
+        console.log('ok - turn right')
+        app.turnRight()
+        app.drawBoard()
+      }
+      // if (currentLine == 'turn left') {
+      if (match[8]) {
+        console.log('ok - turn left')
+        app.turnLeft()
+        app.drawBoard()
+      }
+      
+
+    } else {
+      // si on a tapé n'importe quoi
+      // on définit les messages d'erreur
+      errorLine1 = 'Merci d\'entrer des fonctions valides parmi : "turn right", "turn left" et "move forward"'
+      errorLine2 = 'les commentaires précédés de "//", "#" ou "/*" sont exceptionnellement autorisés'
+      // on crée une div pour les mettre dedans
+      app.errorMessages = document.createElement('div')
+      // avec une classe sur laquelle on va pouvoir appliquer du CSS
+      app.errorMessages.classList.add('errorMessages')
+      // on crée un paragraphe
+      errorParagraph1 = document.createElement('p')
+      // avec une classe
+      errorParagraph1.classList.add('error')
+      // dans lequel on met le premier message d'erreur
+      errorParagraph1.textContent = errorLine1
+      // un 2ème paragraphe
+      errorParagraph2 = document.createElement('p')
+      // une classe sous-titre d'erreur
+      errorParagraph2.classList.add('errorSubtitle')
+      // dans lequel on met le deuxième message d'erreur
+      errorParagraph2.textContent = errorLine2
+      // on vient ajouter les paragraphes dans la div
+      app.errorMessages.appendChild(errorParagraph1)
+      app.errorMessages.appendChild(errorParagraph2)
+      // et on ajoute la div en question tout en haut de la page
+      errorDiv = document.querySelector('div.label')
+      errorDiv.prepend(app.errorMessages)
+      return
+    }
     // Increment
     index++;
 
@@ -207,7 +263,6 @@ var app = {
       // si il n'y a pas de 'game over' on continue de vérifier et d'exécuter le code
       if (!app.gameOver) {
         // Recall same method (=> make a loop) 1000 au lieu de 100
-        // TODO bug fix = si on sort du cadre, codeLineLoop continue à boucler malgré le 'game over'
         window.setTimeout(function () {
           app.codeLineLoop(codeLines, index)
         }, 100)
@@ -231,7 +286,6 @@ var app = {
   },
 
   checkSuccess: function () {
-    // TODO display if the game is won or not
     if (app.x == app.xFinish && app.y == app.yFinish) {
       alert('CONGRATULATIONS, YOU WIN !')
       document.getElementById('userCode').value = ''
@@ -249,13 +303,7 @@ var app = {
 document.addEventListener('DOMContentLoaded', app.init);
 
 /*
-moveForward
-moveForward
-moveForward
-moveForward
-moveForward
-turnRight
-moveForward
-moveForward
-moveForward
+move forward
+turn right
+turn left
 */
