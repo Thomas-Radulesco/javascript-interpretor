@@ -1,17 +1,25 @@
 var app = {
   errorMessages: '',
-  regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/,
+  regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/i,
   gameOver: false,
   init: function () {
     console.log('init')
-
     app.getRandomPositions()
     app.drawBoard()
     // Event listeners
     // document.addEventListener('keydown', app.handleKeys)
     document.getElementById('launchScript').addEventListener('click', app.handleLaunchScriptButton)
+    document.getElementById('reset').addEventListener('click', app.reset)
 
   },
+
+  reset: function () {
+    app.gameOver = false
+    app.errorMessages.remove()
+    document.getElementById('userCode').value = ''
+    app.init()
+  },
+
   getRandomPositions: function () {
     app.direction = 'right'
     app.xStart = Math.floor(Math.random() * 6) + 1
@@ -230,7 +238,7 @@ var app = {
       app.errorMessages.appendChild(errorParagraph1)
       app.errorMessages.appendChild(errorParagraph2)
       // et on ajoute la div en question tout en haut de la page
-      errorDiv = document.querySelector('div.label')
+      errorDiv = document.querySelector('div.label').parentNode
       errorDiv.prepend(app.errorMessages)
       return
     }
