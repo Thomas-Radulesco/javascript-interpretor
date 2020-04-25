@@ -1,37 +1,52 @@
 var app = {
-  x: 1,
-  y: 1,
-  direction: 'right',
-  init: function () {
-    console.log('init');
 
+  direction: 'right',
+  moves: ['moveForward', 'turnRight', 'turnLeft', ''],
+  gameOver: false,
+  init: function () {
+    console.log('init')
     // TODO
     // app.moveForward()
     // app.turnRight()
     // app.moveForward()
     // app.turnLeft()
     // app.moveForward()
+    app.getRandomPositions()
     app.drawBoard()
-
     // Event listeners - TODO
     document.addEventListener('keydown', app.handleKeys)
     document.getElementById('launchScript').addEventListener('click', app.handleLaunchScriptButton)
 
   },
+  getRandomPositions: function () {
+    app.direction = 'right'
+    app.xStart = Math.floor(Math.random() * 6) + 1
+    app.yStart = Math.floor(Math.random() * 4) + 1
+    app.x = app.xStart
+    app.y = app.yStart
+    app.xFinish = Math.floor(Math.random() * 6) + 1
+    app.yFinish = Math.floor(Math.random() * 4) + 1
+    console.log('Start : [' + app.xStart + ',' + app.yStart + ']')
+    console.log('Finish : [' + app.xFinish + ',' + app.yFinish + ']')
+    if (
+      ((app.xStart >= app.xFinish - 1) && (app.xStart <= app.xFinish + 1)) &&
+      ((app.yStart >= app.yFinish - 1) && (app.yStart <= app.yFinish + 1))
+    ) {
+      app.getRandomPositions()
+    }
+    return
+  },
   handleKeys: function (evt) {
     if (evt.key === 'ArrowUp') {
       app.moveForward()
-      // app.eraseBoard()
       app.drawBoard()
     }
     if (evt.key === 'ArrowRight') {
       app.turnRight()
-      // app.eraseBoard()
       app.drawBoard()
     }
     if (evt.key === 'ArrowLeft') {
       app.turnLeft()
-      // app.eraseBoard()
       app.drawBoard()
     }
   },
@@ -56,10 +71,10 @@ var app = {
       (app.x > 6) ||
       (app.y < 1) ||
       (app.y > 4)) {
-      alert('Vous êtes sorti du cadre - GAME OVER')
-      app.x = 1
-      app.y = 1
-      app.direction = 'right'
+      // TODO bug fix = si on sort du cadre, app.codeLineLoop continue à boucler malgré le 'game over'
+      alert('OUT OF BOUNDS ! - GAME OVER')
+      app.gameOver = true
+      document.getElementById('userCode').value = ''
       app.init()
     }
   },
@@ -123,10 +138,10 @@ var app = {
       for (let j = 1; j <= 6; j++) {
         let newCell = document.createElement('div')
         newCell.classList.add('cell')
-        if ((i == 1) && (j == 1)) {
+        if ((i == app.yStart) && (j == app.xStart)) {
           newCell.classList.add('cellStart')
         }
-        if ((i == 4) && (j == 6)) {
+        if ((i == app.yFinish) && (j == app.xFinish)) {
           newCell.classList.add('cellEnd')
         }
         if ((i == currentPosition[1]) && (j == currentPosition[0])) {
@@ -144,13 +159,8 @@ var app = {
         if (currentDirection == 'bottom') {
           newCell.classList.add('cellCurrent-bottom')
         }
-
-
-
-
         newRow.appendChild(newCell)
       }
-
       document.getElementById('board').appendChild(newRow)
     }
 
@@ -177,9 +187,7 @@ var app = {
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
 
-    moves = ['moveForward', 'turnRight', 'turnLeft']
-
-    if (moves.indexOf(currentLine) < 0) {
+    if (app.moves.indexOf(currentLine) < 0) {
       alert('Merci d\'entrer des fonctions valides parmi : moveForward, turnRight ou turnLeft')
       return
     } else {
@@ -193,32 +201,61 @@ var app = {
     // Increment
     index++;
 
+
     // if still a line to interpret
     if (index < codeLines.length) {
-      // Recall same method (=> make a loop) 1000 au lieu de 100
-      window.setTimeout(function () {
-        app.codeLineLoop(codeLines, index)
-      }, 100)
+      // si il n'y a pas de 'game over' on continue de vérifier et d'exécuter le code
+      if (!app.gameOver) {
+        // Recall same method (=> make a loop) 1000 au lieu de 100
+        // TODO bug fix = si on sort du cadre, codeLineLoop continue à boucler malgré le 'game over'
+        window.setTimeout(function () {
+          app.codeLineLoop(codeLines, index)
+        }, 100)
+      } else {
+        // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
+        app.gameOver = false
+      }
     } else {
-      window.setTimeout(function () {
-        app.checkSuccess()
-      }, 100)
+      // si il n'y a pas de 'game over' et qu'on est arrivés en fin de code
+      if (!app.gameOver) {
+        window.setTimeout(function () {
+          // on vérifie si on a gagné 
+          app.checkSuccess()
+        }, 100)
+      } else {
+        // sinon, s'il y a un 'game over', on réinitialise la valeur de app.gameOver à false pour pouvoir rejouer normalement
+        app.gameOver = false
+      }
     }
+
   },
 
   checkSuccess: function () {
     // TODO display if the game is won or not
-    if (app.x == 6 && app.y == 4) {
+    if (app.x == app.xFinish && app.y == app.yFinish) {
       alert('CONGRATULATIONS, YOU WIN !')
+      document.getElementById('userCode').value = ''
+      app.init()
       return
     }
     alert('SORRY, YOU LOOSE ! TRY AGAIN !')
-    app.x = 1
-    app.y = 1
-    app.direction = 'right'
+    app.gameOver = true
+    document.getElementById('userCode').value = ''
     app.init()
     return
   }
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
+
+/*
+moveForward
+moveForward
+moveForward
+moveForward
+moveForward
+turnRight
+moveForward
+moveForward
+moveForward
+*/
