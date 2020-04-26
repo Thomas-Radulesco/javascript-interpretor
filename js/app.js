@@ -1,15 +1,33 @@
 var app = {
   errorMessages: '',
-  regCommand: /(^\/\/.*$)|(^\#.*$)|(^\/\*.*$)|(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/i,
+  // au départ, il y a du son ^_^
+  SFX: true,
+  // je pose une regex pour intérpreter le code.
+  // ça peut paraître plus compliqué au départ, mais c'est d'une telle puissance :D !
+  // ma regex vérifie que la chaîne de caractères à laquelle elle est comparée est soit un commentaire, 
+  // soit une instruction, soit une instruction précédée d'espaces, soit une instruction suivie de commentaires ou d'espaces, soit du vide
+  // de telle façon que toute instruction valide sera interprétée dans la méthode 'codeLineLoop'
+  // N.B. j'ai choisi de pouvoir initialiser les commentaires soit par "//", soit par "/*", soit par "#"
+  regCommand: /(^ *move forward *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn left *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *turn right *(\/\/.*)*(\#.*)*(\/\*.*)*$)|(^ *(\/\/.*)*(\#.*)*(\/\*.*)*$)/i,
+  // lien : https://regex101.com/r/ibVDJg/5
+  // merci regex101.com !
   gameOver: false,
   init: function () {
     // console.log('init')
     app.getRandomPositions()
     app.drawBoard()
+
     // Event listeners
+
+    // au cas où on voudrait pouvoir utiliser les flèches du clavier
+    // N.B. dans ce cas, il n'y a pas de vérification si on a gagné ou pas (trop facile :p )
     // document.addEventListener('keydown', app.handleKeys)
+
     document.getElementById('launchScript').addEventListener('click', app.handleLaunchScriptButton)
     document.getElementById('reset').addEventListener('click', app.reset)
+    document.querySelector('i.fas').addEventListener('click', app.toggleSFX)
+    document.getElementById('board').parentNode.style.display = 'flex'
+
 
   },
 
@@ -33,9 +51,12 @@ var app = {
     // console.log('Start : [' + app.xStart + ',' + app.yStart + ']')
     // console.log('Finish : [' + app.xFinish + ',' + app.yFinish + ']')
     if (
+      // si les points de départ et d'arrivée sont en contact
       ((app.xStart >= app.xFinish - 1) && (app.xStart <= app.xFinish + 1)) &&
       ((app.yStart >= app.yFinish - 1) && (app.yStart <= app.yFinish + 1))
     ) {
+      // je considère qu'il n'y a pas de challenge
+      // donc je relance la méthode (récursive) pour placer les points un peu mieux
       app.getRandomPositions()
     }
     return
@@ -184,8 +205,7 @@ var app = {
   codeLineLoop: function (codeLines, index) {
     // Getting currentLine
     let currentLine = codeLines[index]
-    // console.log(currentLine)
-    // console.log(typeof currentLine)
+    console.log(codeLines)
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
 
@@ -196,30 +216,49 @@ var app = {
     // window.location = 'http://www.google.com'
 
     if ((app.regCommand.exec(currentLine))) {
+      // la variable 'match' est un tableau d'occurences de correspondance entre la ligne courante du code entré par l'utilisateur
+      // et l'app.regCommand posée en début de code
+      // les index de ce tableau correspondent aux groupes et sous-groupes de la regex : 1, 2, 3, ...
       let match = app.regCommand.exec(currentLine)
 
       // console.log('c\'est pas faux')
-      if (match[4]) {
+      if (match[1]) {
         // console.log('ok - move forward')
+        // l'index 1 du tableau 'match' correspond à l'instruction 'move forward'
         app.moveForward()
         app.drawBoard()
       }
-      if (match[12]) {
+      if (match[9]) {
         // console.log('ok - turn right')
+        // l'index 9 du tableau 'match' correspond à l'instruction 'turn right'
         app.turnRight()
         app.drawBoard()
       }
-      if (match[8]) {
+      if (match[5]) {
         // console.log('ok - turn left')
+        // l'index 5 du tableau 'match' correspond à l'instruction 'turn left'
         app.turnLeft()
         app.drawBoard()
       }
 
 
+      // je veux pouvoir effacer le tableau d'input utilisateur au fur et à mesure de l'exécution des commandes valables ou des commentaires
+      // 1/ effacer l'input
+      document.getElementById('userCode').value = ''
+      // 2/ copier le tableau codeLines à partir de index+1 jusqu'à la fin, ligne par ligne dans newCodeLine
+      for (let i = index + 1; i < codeLines.length; i++) {
+        let newCodeLine = codeLines[i]
+        // 3/ coller la nouvelle ligne dans l'input, avec le passage à la ligne
+        document.getElementById('userCode').value += newCodeLine+'\n'
+      }
+
+
+
+
     } else {
       // si on a tapé n'importe quoi
       // on définit les messages d'erreur
-      errorLine1 = 'Merci d\'entrer des fonctions valides parmi : "turn right", "turn left" et "move forward"'
+      errorLine1 = 'Merci d\'entrer des commandes valides parmi : "turn right", "turn left" et "move forward"'
       errorLine2 = 'les commentaires précédés de "//", "#" ou "/*" sont exceptionnellement autorisés'
       // on crée une div pour les mettre dedans
       app.errorMessages = document.createElement('div')
@@ -241,10 +280,22 @@ var app = {
       app.errorMessages.appendChild(errorParagraph1)
       app.errorMessages.appendChild(errorParagraph2)
       // et on ajoute la div en question tout en haut de la page
-      errorDiv = document.querySelector('div.label').parentNode
+      errorDiv = document.querySelector('div.toggleSFX').parentNode
       errorDiv.prepend(app.errorMessages)
+      // on check si on veut du son
+      if(app.SFX==true){
+      // on joue un petit bip d'erreur
+      app.beep(0.1, 440, 'sawtooth', 100)
+      }
       return
     }
+     // on check si on veut du son
+     if(app.SFX==true){
+      // on joue un petit bip "ok"
+      app.beep(0.1, 2850, 'sawtooth', 150)
+     }
+
+
     // Increment
     index++;
 
@@ -276,18 +327,83 @@ var app = {
     }
 
   },
+  toggleSFX: function () {
+    if (app.SFX == true){
+      app.SFX = false
+      document.querySelector('i.fas').classList.remove('fa-volume-up')
+      document.querySelector('i.fas').classList.add('fa-volume-mute')
 
+    } else {
+      app.SFX = true
+      document.querySelector('i.fas').classList.remove('fa-volume-mute')
+      document.querySelector('i.fas').classList.add('fa-volume-up')
+    }
+
+    
+  },
   checkSuccess: function () {
     if (app.x == app.xFinish && app.y == app.yFinish) {
-      alert('CONGRATULATIONS, YOU WIN !')
+      // on check si on veut du son
+      if(app.SFX==true){
+      // petite musique de la victoire La4 Mi4 Fa#4 Sol4 La4 Mi4 La4
+      let tempo = 180
+      let noire = (60/tempo)*1000
+      app.beep(0.1, 880, 'sine', noire)
+      window.setTimeout(function() {app.beep(0.1, 659.255, 'sine', noire*0.5)}, noire*1+10)
+      window.setTimeout(function() {app.beep(0.1, 739.989, 'sine', noire*0.5)}, noire*1.5+20)
+      window.setTimeout(function() {app.beep(0.1, 783.991, 'sine', noire*0.5)}, noire*2+30)
+      window.setTimeout(function() {app.beep(0.1, 880, 'sine', noire)}, noire*2.5+40)
+      window.setTimeout(function() {app.beep(0.1, 659.255, 'sine', noire*0.5)}, noire*3.5+50)
+      window.setTimeout(function() {app.beep(0.1, 880, 'sine', noire*1.5)}, noire*4+60)
+      // la petite alerte après la fin de la musique, sinon, bug
+      window.setTimeout(function() {alert('CONGRATULATIONS, YOU WIN !')}, noire*5.5+25+70)      
+      }else{
+        alert('CONGRATULATIONS, YOU WIN !')
+      }
       document.getElementById('userCode').value = ''
       app.init()
       return
-    }
-    alert('SORRY, YOU LOOSE ! TRY AGAIN !')
-    app.gameOver = true
-    document.getElementById('userCode').value = ''
-    app.init()
+      }
+      // on check si on veut du son
+      if(app.SFX==true){
+      // petite musique de la défaite Si2 Fa#2 Mi2 Si1
+      let tempo = 120
+      let noire = (60/tempo)*1000
+      app.beep(0.1, 246.942, 'triangle', noire*0.5)
+      window.setTimeout(function() {app.beep(0.1, 184.997, 'triangle', noire*0.5)}, noire*0.5+10)
+      window.setTimeout(function() {app.beep(0.1, 164.814, 'triangle', noire*0.5)}, noire*1+20)
+      window.setTimeout(function() {app.beep(0.1, 123.471, 'triangle', noire*1)}, noire*1.5+30)
+      // la petite alerte après la fin de la musique, sinon, bug
+      window.setTimeout(function() {alert('SORRY, YOU LOOSE ! TRY AGAIN !')}, noire*2.5+25+40)
+      }else{
+        alert('SORRY, YOU LOOSE ! TRY AGAIN !')
+      }
+      app.gameOver = true
+      document.getElementById('userCode').value = ''
+      app.reset()
+      return
+  },
+
+  beep: function (gain, frequency, type, duration) {
+    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+    let oscillator = audioCtx.createOscillator();
+    let gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    gainNode.gain.value = gain;
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+
+    oscillator.start();
+
+    setTimeout(
+      function () {
+        oscillator.stop();
+      },
+      duration
+    );
     return
   }
 };
