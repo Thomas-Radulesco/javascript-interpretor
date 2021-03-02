@@ -205,7 +205,7 @@ var app = {
   codeLineLoop: function (codeLines, index) {
     // Getting currentLine
     let currentLine = codeLines[index]
-    console.log(codeLines)
+    // console.log(codeLines)
     // eval() fonctionne mais pas safe ! ne pas utiliser
     // eval(currentLine)
 
@@ -258,8 +258,8 @@ var app = {
     } else {
       // si on a tapé n'importe quoi
       // on définit les messages d'erreur
-      errorLine1 = 'Merci d\'entrer des commandes valides parmi : "turn right", "turn left" et "move forward"'
-      errorLine2 = 'les commentaires précédés de "//", "#" ou "/*" sont exceptionnellement autorisés'
+      errorLine1 = 'Please enter a valid command line among : "turn right", "turn left" & "move forward"'
+      errorLine2 = 'comments preceded by "//", "#" or "/*" are surprisingly allowed'
       // on crée une div pour les mettre dedans
       app.errorMessages = document.createElement('div')
       // avec une classe sur laquelle on va pouvoir appliquer du CSS

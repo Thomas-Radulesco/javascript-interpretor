@@ -21,6 +21,16 @@ body {
   height: 10rem;
 }
 
+.helptext {
+  font-size: small;
+}
+
+.container {
+  margin: 0 auto;
+  width: 80vw;
+  max-width: 750px;
+}
+
 #launchScript {
   background-color: greenyellow;
   border: 0;

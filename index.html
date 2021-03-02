@@ -4,25 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DecompOser</title>
+    <title>Interpretor</title>
 
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
         integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" type="image/png" href="http://interpretor.surge.sh/favicon.png">
 </head>
 
 <body>
-    <div>
+    <div class="container">
         <div class="toggleSFX"><i class="fas fa-volume-up"></i></div>
         <div class="label">
             <p>Your code</p>
-            <button id="reset" title="Cela ne me plaît point, dessine-moi autre chose">meh</button>
+            <button id="reset" title="This is not my cup of tea, draw me something else">Reset</button>
         </div>
+        <span class="helptext">Available commands : turn left, turn right and move forward. Comments can be initialized by //, # or /*. Blanks do not throw errors</span>
         <textarea id="userCode"
             title="Available commands : turn left, turn right and move forward. Comments can be initialized by //, # or /*. Blanks do not throw errors"></textarea>
 
-        <button id="launchScript">Lancer le script</button>
+        <button id="launchScript">Run script</button>
 
     </div>
     <div>
